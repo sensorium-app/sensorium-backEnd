@@ -25,7 +25,7 @@ export function sendEmail (emailsAndNames:any[]){
         ]
     };
 
-    mailjet.connect('6650361de0011b7c50b57bb3b70a12b8', 'f0ad1e8691024a4262f429797ce4eba5');
+    mailjet.connect('', '');
 
     return new Promise((resolve, reject) =>{
         const request = mailjet

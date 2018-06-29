@@ -207,42 +207,6 @@ function createCluster(newSensateId, sensateData){
     });
 }
 
-function sendEmail (){
-    const mailjet = require ('node-mailjet')
-		.connect('6650361de0011b7c50b57bb3b70a12b8', 'f0ad1e8691024a4262f429797ce4eba5')
-	const request = mailjet
-		.post("send", {'version': 'v3.1'})
-		.request({
-			"Messages":[
-				{
-					"From": {
-						"Email": "info@sensorium.online",
-						"Name": "Sensorium"
-					},
-					"To": [
-						{
-							"Email": "leo342135@gmail.com",
-							"Name": "passenger 1"
-						}
-					],
-					"TemplateID": 467059,
-					"TemplateLanguage": true,
-					"Subject": "New sensate on your cluster!",
-					"Variables": {
-		  "name": "Leo"
-		}
-				}
-			]
-		})
-	request
-		.then((result) => {
-			console.log(result.body)
-		})
-		.catch((err) => {
-			console.log(err)
-		})
-}
-
 function extractDateFromDate(date){
     let dateToProcess = moment(date);
     return dateToProcess.year() + '-' + dateToProcess.month() + '-' + dateToProcess.date();
