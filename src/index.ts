@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as moment from 'moment';
+import './misc/userNotifications';
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -73,9 +74,8 @@ export const clusterCreation = functions.firestore
                     const clusterType = clusterData.type;
                     
                     let sensates = clusterData.sensates;
-                    sensates[newSensateId] = true;
 
-                    updateCluster(cluster.id, clusterType, sensates).then((res)=>{
+                    updateCluster(cluster.id, clusterType, sensates, newSensateId).then((res)=>{
                         resolve(res);  
                     }).catch((err)=>{
                         reject(err);
@@ -103,15 +103,37 @@ export const clusterCreation = functions.firestore
 
 });
 
-function updateCluster(clusterId, clusterType, sensates){
+function updateCluster(clusterId, clusterType, sensates, newSensateId){
     
     return new Promise((resolve, reject) =>{
 
         console.log('update', clusterType);
+        sensates[newSensateId] = true;
 
         db.collection('clusters').doc(clusterId).update({sensates: sensates}).then((sensateAddedResponse:any)=>{
             console.log('Added to '+clusterType+' cluster', sensateAddedResponse);
-            resolve('Added to '+clusterType+' cluster');
+            
+            Object.keys(sensates).forEach((sensateKey:string)=>{
+                if(!sensates[newSensateId]){
+                    let sensatesToInform = [];
+                    db.collection('sensates').doc(sensateKey).get().then((sensateData:any)=>{
+                        
+                        sensatesToInform.push({
+                            email: sensateData.email,
+                            name: sensateData.name
+                        });
+
+                    }).catch((errSensate)=>{
+                        resolve('Added to '+clusterType+' cluster, but others not informed');
+                    });
+
+                    if(sensatesToInform.length>0){
+                        //sendEmail(sensatesToInform)
+                        sendEmail();
+                    }
+                }
+            });
+            
         }).catch((err)=>{
             console.log(err);
             reject(err);
@@ -183,6 +205,42 @@ function createCluster(newSensateId, sensateData){
         });
         
     });
+}
+
+function sendEmail (){
+    const mailjet = require ('node-mailjet')
+		.connect('6650361de0011b7c50b57bb3b70a12b8', 'f0ad1e8691024a4262f429797ce4eba5')
+	const request = mailjet
+		.post("send", {'version': 'v3.1'})
+		.request({
+			"Messages":[
+				{
+					"From": {
+						"Email": "info@sensorium.online",
+						"Name": "Sensorium"
+					},
+					"To": [
+						{
+							"Email": "leo342135@gmail.com",
+							"Name": "passenger 1"
+						}
+					],
+					"TemplateID": 467059,
+					"TemplateLanguage": true,
+					"Subject": "New sensate on your cluster!",
+					"Variables": {
+		  "name": "Leo"
+		}
+				}
+			]
+		})
+	request
+		.then((result) => {
+			console.log(result.body)
+		})
+		.catch((err) => {
+			console.log(err)
+		})
 }
 
 function extractDateFromDate(date){
