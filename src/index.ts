@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as moment from 'moment';
-import './misc/userNotifications';
+import {sendEmail} from './misc/userNotifications';
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -103,78 +103,62 @@ export const clusterCreation = functions.firestore
 
 });
 
-async function getSensate(sensates){
-    let sensatesList = await Object.keys(sensates);
-    console.log(sensatesList)
-
-    /*for(let i=0; i<sensatesList.length; i++){
-    let promises = [
-        new Promise(resolve => setTimeout(resolve, 0, 1)),
-        new Promise(resolve => setTimeout(resolve, 0, 2))
-    ];*/
-
-    return Promise.all(sensatesList)
-    .then((resolvedValues) => {
-        console.log(resolvedValues);
-
-        let list=[];
-        for(let i=0; i<resolvedValues.length; i++){
-            db.collection('sensates').doc(resolvedValues[i]).get().then((sensateData:any)=>{
-                console.log(sensateData.email, '114')
-                list.push( {
-                    email: sensateData.email,
-                    name: sensateData.name
-                });
-            }).catch((err)=>{
-                console.log(err);
-                return null;
-            });
-            
+function getSensates(sensates, newSensateId){
+    let sensatesPromises = [];
+    Object.keys(sensates).forEach((sensateKey)=>{
+        if(sensateKey !== newSensateId){
+            sensatesPromises.push(
+                db.collection('sensates').doc(sensateKey).get().then((sensateData)=>{
+                    if(sensateData.exists){
+                        return sensateData.data();
+                    }else{
+                        return null;
+                    }
+                }).catch((err)=>{
+                    return null;
+                })
+            )
         }
+    });
+
+    return Promise.all(sensatesPromises)
+    .then((resolvedValues) => {
+        let list=[];
+        
+        resolvedValues.forEach((sensatesData)=>{
+            if(sensatesData){
+                list.push( {
+                    email: sensatesData.email,
+                    name: sensatesData.name
+                });
+            }
+        });
+
         return list;
     });
-    /**/
+
 }
 
-async function updateCluster(clusterId, clusterType, sensates, newSensateId){
+function updateCluster(clusterId, clusterType, sensates, newSensateId){
     
     return new Promise((resolve, reject) =>{
 
-        console.log('update', clusterType);
         sensates[newSensateId] = true;
 
         db.collection('clusters').doc(clusterId).update({sensates: sensates}).then((sensateAddedResponse:any)=>{
             console.log('Added to '+clusterType+' cluster', sensateAddedResponse);
-            let sensatesToInform = [];
-            
-            /*Object.keys(sensates).forEach((sensateKey:string)=>{
-                console.log(sensateKey);
-                if(!sensates[newSensateId]){
-                    
-                    db.collection('sensates').doc(sensateKey).get().then((sensateData:any)=>{
-                        sensatesToInform.push({email: sensateData.email});
-                    });
-                    console.log('132', sensatesToInform);
-                    
-                }
-            });*/
 
-            getSensate(sensates).then((ress)=>{
-                console.log(ress, '155');
-                resolve(ress);
+            getSensates(sensates, newSensateId).then((sensateList)=>{
+                sendEmail(sensateList).then((emailResponse)=>{
+                    resolve(emailResponse);
+                }).catch((err)=>{
+                    resolve('Sensate added but others not notified');
+                })
+                
             }).catch((errr)=>{
                 console.log(errr);
                 reject(errr)
             })
-
-            /*console.log('136', sensatesToInform);
-            if(sensatesToInform.length>0){
-                console.log('138', sensatesToInform);
-                //sendEmail(sensatesToInform)
-                //sendEmail();
-            }
-            console.log('142', sensatesToInform);
-            //resolve('Added and other members notified');*/
             
         }).catch((err)=>{
             console.log(err);
