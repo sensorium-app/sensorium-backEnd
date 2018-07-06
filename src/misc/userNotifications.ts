@@ -33,7 +33,7 @@ export function sendEmail (emailsAndNames:any[]){
 
     console.log(JSON.stringify(requestBody));
 
-    mailjet.connect(functions.config().mailjet.id, functions.config().mailjet.secretKey);
+    mailjet.connect(functions.config().mailjet.id, functions.config().mailjet.key);
 
     return new Promise((resolve, reject) =>{
         const request = mailjet
