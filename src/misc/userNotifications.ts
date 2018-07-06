@@ -33,20 +33,18 @@ export function sendEmail (emailsAndNames:any[]){
 
     console.log(JSON.stringify(requestBody));
 
-    mailjet.connect(functions.config().mailjet.id, functions.config().mailjet.key);
-
     return new Promise((resolve, reject) =>{
-        const request = mailjet
+        mailjet.connect(functions.config().mailjet.id, functions.config().mailjet.key)
             .post("send", {'version': 'v3.1'})
-            .request(requestBody);
+            .request(requestBody)
             
-        request.then((result) => {
-            console.log(result.body);
-            resolve(result.body);
-        })
-        .catch((err) => {
-            console.log(err);
-            reject(err);
-        });
+            .then((result) => {
+                console.log(result.body);
+                resolve(result.body);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
     });
 }

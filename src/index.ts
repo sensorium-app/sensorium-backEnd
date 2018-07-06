@@ -76,14 +76,13 @@ export const clusterCreation = functions.firestore
                     let sensates = clusterData.sensates;
 
                     updateCluster(cluster.id, clusterType, sensates, newSensateId).then((res)=>{
-                        resolve(res);  
+                        console.log(res);
+                        resolve(res);
                     }).catch((err)=>{
                         reject(err);
                     });
 
                 });
-                console.log('Ok, sensate added');
-                resolve('Ok, sensate added');
             }else{
                 console.log('add cluster 1');
                 createCluster(newSensateId, sensate).then((res)=>{
@@ -150,8 +149,10 @@ function updateCluster(clusterId, clusterType, sensates, newSensateId){
 
             getSensates(sensates, newSensateId).then((sensateList)=>{
                 sendEmail(sensateList).then((emailResponse)=>{
+                    console.log('emailResponse',emailResponse);
                     resolve(emailResponse);
                 }).catch((err)=>{
+                    console.log(err);
                     resolve('Sensate added but others not notified');
                 })
                 
