@@ -34,7 +34,16 @@ export function sendEmail (emailsAndNames:any[]){
     console.log(JSON.stringify(requestBody));
 
     return new Promise((resolve, reject) =>{
-        mailjet.connect(functions.config().mailjet.id, functions.config().mailjet.key)
+        let id, key;
+        try{
+            id = functions.config().mailjet.id;
+            key = functions.config().mailjet.key;
+        }catch(e){
+            id = process.env.mailjetid;
+            key = process.env.mailjetkey;
+        }
+
+        mailjet.connect(id, key)
             .post("send", {'version': 'v3.1'})
             .request(requestBody)
             

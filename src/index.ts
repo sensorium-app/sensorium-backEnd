@@ -102,7 +102,7 @@ export const clusterCreation = functions.firestore
 
 });
 
-function getSensates(sensates, newSensateId){
+function getSensatesData(sensates, newSensateId){
     let sensatesPromises = [];
     Object.keys(sensates).forEach((sensateKey)=>{
         if(sensateKey !== newSensateId){
@@ -147,7 +147,7 @@ function updateCluster(clusterId, clusterType, sensates, newSensateId){
         db.collection('clusters').doc(clusterId).update({sensates: sensates}).then((sensateAddedResponse:any)=>{
             console.log('Added to '+clusterType+' cluster', sensateAddedResponse);
 
-            getSensates(sensates, newSensateId).then((sensateList)=>{
+            getSensatesData(sensates, newSensateId).then((sensateList)=>{
                 sendEmail(sensateList).then((emailResponse)=>{
                     console.log('emailResponse',emailResponse);
                     resolve(emailResponse);
