@@ -20,6 +20,7 @@ export const clusterCreation = functions.firestore
         const sensateDesiredClusters = sensate.desiredClusters;
         //const sensatesLanguages = sensate.languagesSpoken;
         const sensatesDoB = sensate.dateTimeOfBirth;
+        const sensateDobOnly = sensate.dateOfBirth;
         const sensatesSkills = sensate.skills;
         const sensatesHobbies = sensate.hobbies;
         const sensatesInterests = sensate.interests;
@@ -31,13 +32,13 @@ export const clusterCreation = functions.firestore
 
         //Aggregate the query
         if(sensateDesiredClusters['dateTimeOfBirth']){
-            let dob = moment(sensatesDoB);
+            let dob = sensateDobOnly;
             
-            console.log(extractDateFromDate(dob));
+            console.log(dob);
 
             clustersRef = db.collection('clusters')
                 .where('type','==','dateTimeOfBirth')
-                .where('typeData', '==', extractDateFromDate(dob));
+                .where('typeData', '==', dob);
         }
         if(sensateDesiredClusters['monthAndDay']){
             let dob = moment(sensatesDoB);
@@ -189,8 +190,8 @@ function createCluster(newSensateId, sensateData){
 
                 if(desiredCluster === 'dateTimeOfBirth'){
                     console.log('add dateTimeOfBirth');
-                    console.log(sensateData.dateTimeOfBirth);
-                    clusterTypeData = extractDateFromDate(sensateData.dateTimeOfBirth);
+                    console.log(sensateData.dateOfBirth);
+                    clusterTypeData = sensateData.dateOfBirth;
                 }
                 if(desiredCluster === 'monthAndDay'){
                     console.log('add monthAndDay');
