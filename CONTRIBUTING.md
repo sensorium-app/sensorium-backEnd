@@ -44,4 +44,7 @@ In a cmd or terminal run:
 	  }
 })
 
+Environment configuration
+	firebase functions:config:set mailjet.id="" mailjet.key=""
+
 Please contact us at info@sensorium.online of any questions or issues.
