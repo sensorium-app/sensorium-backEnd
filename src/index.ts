@@ -7,7 +7,7 @@ admin.initializeApp();
 const db = admin.firestore();
 
 export const clusterCreation = functions.firestore
-  .document('sensates/{id}')
+  .document('sensies/{id}')
   .onCreate((snap, context) => {
 
     const newSensateId = context.params.id;
@@ -108,7 +108,7 @@ function getSensatesData(sensates, newSensateId){
     Object.keys(sensates).forEach((sensateKey)=>{
         if(sensateKey !== newSensateId){
             sensatesPromises.push(
-                db.collection('sensates').doc(sensateKey).get().then((sensateData)=>{
+                db.collection('sensies').doc(sensateKey).get().then((sensateData)=>{
                     if(sensateData.exists){
                         return sensateData.data();
                     }else{
