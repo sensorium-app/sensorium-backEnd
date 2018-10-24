@@ -2,9 +2,12 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as moment from 'moment';
 import {sendEmail} from './misc/userNotifications';
+import {setClaimToUser} from './security/grantClusterPermissions';
+import { user } from 'firebase-functions/lib/providers/auth';
 
 admin.initializeApp();
 const db = admin.firestore();
+const auth = admin.auth();
 
 export const clusterCreation = functions.firestore
   .document('sensies/{id}')
@@ -148,19 +151,27 @@ function updateCluster(clusterId, clusterType, sensates, newSensateId){
         db.collection('clusters').doc(clusterId).update({sensates: sensates}).then((sensateAddedResponse:any)=>{
             console.log('Added to '+clusterType+' cluster', sensateAddedResponse);
 
-            getSensatesData(sensates, newSensateId).then((sensateList)=>{
-                sendEmail(sensateList).then((emailResponse)=>{
-                    console.log('emailResponse',emailResponse);
-                    resolve(emailResponse);
-                }).catch((err)=>{
-                    console.log(err);
-                    resolve('Sensate added but others not notified');
-                })
-                
-            }).catch((errr)=>{
-                console.log(errr);
-                reject(errr)
-            })
+            setClaimToUser(newSensateId, clusterId, auth).then(()=>{
+                console.log('setClaimToUser');
+
+                getSensatesData(sensates, newSensateId).then((sensateList)=>{
+                    sendEmail(sensateList).then((emailResponse)=>{
+                        console.log('emailResponse',emailResponse);
+                        resolve(emailResponse);
+                    }).catch((err)=>{
+                        console.log(err);
+                        resolve('Sensate added but others not notified');
+                    });
+                    
+                }).catch((errr)=>{
+                    console.log(errr);
+                    reject(errr);
+                });
+
+            }).catch((err)=>{
+                console.log(err);
+                reject(err);
+            });
             
         }).catch((err)=>{
             console.log(err);
@@ -221,7 +232,14 @@ function createCluster(newSensateId, sensateData){
 
                 db.collection('clusters').add(newClusterType).then((responseAdd)=>{
                     console.log('Cluster created', responseAdd);
-                    resolve('Cluster created');
+
+                    setClaimToUser(newSensateId, responseAdd.id, auth).then(()=>{
+                        console.log('userClaimResponse');
+                        resolve('Cluster created');
+                    }).catch((err)=>{
+                        reject(err);
+                    });
+                    
                 }).catch((err)=>{
                     console.log(err);
                     reject(err);
