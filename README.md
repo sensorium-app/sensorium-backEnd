@@ -1,15 +1,11 @@
 # Sensorium
-App's Logic to connect with people with who you share a lot in common
+App's Logic to connect with people with who you share a lot in common. It's a firebase cloud functions project written in TypeScript for clustering and psycellium magic!
 
-It's a firebase cloud functions project for clustering and psycellium magic!
-
-Thank you for your interest in helping this project!
-
-As a bit of background, this project uses [Firebase's Cloud Functions](https://firebase.google.com/docs/functions/get-started)
-
-You should join our [Slack](https://join.slack.com/t/sense8app/shared_invite/enQtMzA3MzIwMDU0NjQ3LWIzMDA1ZTY4OTczMzJiOTU3ZjkwZGFmNTAzODc1ZjBjOWZjNjc4YmVlMjhjNWI3Zjc4OGIwMmEyZWQwY2ZlYjE) channel about any question that you might have and to collaborate!
+Thank you for your interest in helping this project! You should join our [Slack](https://join.slack.com/t/sense8app/shared_invite/enQtMzA3MzIwMDU0NjQ3LWIzMDA1ZTY4OTczMzJiOTU3ZjkwZGFmNTAzODc1ZjBjOWZjNjc4YmVlMjhjNWI3Zjc4OGIwMmEyZWQwY2ZlYjE) channel about any question that you might have and to collaborate!
 
 ### Running the app locally for development
+As a bit of background, this project uses [Firebase's Cloud Functions](https://firebase.google.com/docs/functions/get-started)
+
 Start by cloning the folder on your system. After cloning it, you will have a folder named ```sensorium-backEnd``` in your working directory. After cloning it, run following commands to initiate and run the app:
 
 ```bash
