@@ -1,57 +1,68 @@
-# sensorium
+# Sensorium
 App's Logic to connect with people with who you share a lot in common
 
 It's a firebase cloud functions project for clustering and psycellium magic!
 
 Thank you for your interest in helping this project!
 
-As a bit of background, this project uses Firebase's Cloud Functions:
-https://firebase.google.com/docs/functions/get-started
+As a bit of background, this project uses [Firebase's Cloud Functions](https://firebase.google.com/docs/functions/get-started)
 
-Before clonning the repo on your machine, you should consider a folder structure like this:
+You should join our [Slack](https://join.slack.com/t/sense8app/shared_invite/enQtMzA3MzIwMDU0NjQ3LWIzMDA1ZTY4OTczMzJiOTU3ZjkwZGFmNTAzODc1ZjBjOWZjNjc4YmVlMjhjNWI3Zjc4OGIwMmEyZWQwY2ZlYjE) channel about any question that you might have and to collaborate!
 
-/sensorium-backEnd/functions (cloned repo here)
+### Running the app locally for development
+Start by cloning the folder on your system. After cloning it, you will have a folder named ```sensorium-backEnd``` in your working directory. After cloning it, run following commands to initiate and run the app:
 
-Do these steps beside the functions folder:
-firebase login
-    With your gmail account
+```bash
+cd sensorium-backEnd
 firebase init functions
-    In here select the dev firebase project
-    It'll tell you to replace some files, indicate NO
-    Install the dependencies with npm
-    And that should be it!
-	
-To invoke to functions do it like this:
+```
+#### Note
+Before running ```firebase init functions``` make sure that Firebase is installed and set up on your system. Plus your Google account will also have to be added to the project (which you can request by joining our Slack channel). Read Firebase documentation to see how to [get started with Firebase](https://firebase.google.com/docs/functions/get-started). If Firebase is already installed, you might have to run ```firebase login``` and login with your Google account before running ```firebase init functions```.
 
-In a cmd or terminal run:
-    "npm run shell", type in something like the following snippet, and happy dev/testing!
-	
-	clusterCreation({
-      "uid": "",
-	  "name": "",
-	  "lastName": "",
-	  "secondLastName":"",
-	  "email": "",
-	  "gender": "",
-	  "dateTimeOfBirth": "",
-	  "skills":{},
-	  "hobbies": {},
-	  "interests":{},
-	  "languagesSpoken":{},
-	  "desiredClusters": {
-		  "dateTimeOfBirth": true,
-		  "monthAndDay": false,
-		  "monthAndYear": false,
-		  "month": false,
-		  "skills": false,
-		  "hobbies": false,
-		  "interests": false
-	  }
-})
+* After running ```firebase init functions```, you will have to do following steps:  
+	* Select the project **sensorium-76912 (Sensorium)** (if not autoselected)  
+	* Choose the language **TypeScript**  
+	* Answer **Yes(Y)** to _Do you want to use TSLint to catch probable bugs and enforce style?_
+	* Answer **No(N)** to every subsequent file overwrite prompt. We don't want to overwrite any file.
+	* Finally answer **Yes(Y)** to _Do you want to install dependencies with npm now?_ This will install all the npm dependencies being used in the project.
 
-Environment configuration
-	firebase functions:config:set mailjet.id="" mailjet.key=""
+Now you are ready to run to project and play around! Just do:
+```bash
+cd functions
+npm run shell     //starts the app
+```
+If run successfully, you will get a prompt in the console like: ```firebase >```  
+Now you can run Firebase commands.
 
-Please contact us at info@sensorium.online of any questions or issues.
+Create your first cluster by running `clusterCreation()` function with following object as the parameter (make sure to fill in the appropriate values for the keys)
+```
+{ 
+"uid": "", 
+"name": "",
+"lastName": "",
+"secondLastName":"",
+"email": "",
+"gender": "",
+"dateTimeOfBirth": "",
+"skills":{},
+"hobbies": {},
+"interests":{},
+"languagesSpoken":{},
+"desiredClusters": 
+	{ 
+	"dateTimeOfBirth": true, 
+	"monthAndDay": false, 
+	"monthAndYear": false,
+	"month": false,
+	"skills": false,
+	"hobbies": false,
+	"interests": false 
+	}
+}
+```
+Environment configuration  
+`firebase functions:config:set mailjet.id="" mailjet.key=""`
 
-License pending
+Happy testing!
+
+If you are stuck anywhere, or have an idea or questions about a feature, contact us on the [Slack](https://join.slack.com/t/sense8app/shared_invite/enQtMzA3MzIwMDU0NjQ3LWIzMDA1ZTY4OTczMzJiOTU3ZjkwZGFmNTAzODc1ZjBjOWZjNjc4YmVlMjhjNWI3Zjc4OGIwMmEyZWQwY2ZlYjE) channel or [email](info@sensorium.online) us!
