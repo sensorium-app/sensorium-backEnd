@@ -28,9 +28,9 @@ cd functions
 npm run shell     //starts the app
 ```
 If run successfully, you will get a prompt in the console like: ```firebase >```  
-Now you can run Firebase commands.
+Now you can run Firebase commands!
 
-Create your first cluster by running `clusterCreation()` function with following object as the parameter (make sure to fill in the appropriate values for the keys)
+Create your first cluster by calling `clusterCreation()` function with following object as the parameter (make sure to fill in the appropriate values for the keys)
 ```
 { 
 "uid": "", 
