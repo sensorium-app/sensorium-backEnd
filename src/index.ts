@@ -4,12 +4,73 @@ import * as moment from 'moment';
 import {sendEmail} from './misc/userNotifications';
 import {setClaimToUser} from './security/grantClusterPermissions';
 import { user } from 'firebase-functions/lib/providers/auth';
+import {deleteCollection} from './deleteSubCollection/deleteSubCollection';
 
 admin.initializeApp();
 const db = admin.firestore();
 const auth = admin.auth();
 
-export const clusterCreation = functions.firestore
+export const sensieCreation = functions.firestore
+  .document('sensies/{id}')
+  .onCreate((snap, context) => {
+
+    const newSensateId = context.params.id;
+
+    return new Promise((resolve, reject) =>{
+        const sensate = snap.data();
+        //console.log('sensateData',sensate);
+
+        const sensateDesiredClusters = sensate.desiredClusters;
+        const sensatesDoB = sensate.dateTimeOfBirth;
+        const aboutme = sensate.aboutme;
+        //let clustersRef = db.collection('clusters');
+        //console.log("new", sensateDesiredClusters, sensatesDoB,aboutme)
+
+        let dob = moment(sensatesDoB);
+        console.log(dob,extractMonthAndDayFromDate(dob))
+        db.collection('clusters')
+            .where('type','==','monthAndDay')
+            .where('typeData', '==',  extractMonthAndDayFromDate(dob))
+            .get().then((clustersFiltered) => {
+
+            console.log('then de clusters - 37', clustersFiltered.size, JSON.stringify(clustersFiltered.query));
+
+            if(!clustersFiltered.empty){
+                console.log('not empty');
+                //add sensate to clusters
+                clustersFiltered.forEach((cluster:any) => {
+                    const clusterData = cluster.data();
+                    console.log(clusterData);
+                    const clusterType = clusterData.type;
+                    
+                    let sensates = clusterData.sensates;
+
+                    updateCluster(cluster.id, clusterType, sensates, newSensateId).then((res)=>{
+                        console.log(res);
+                        resolve(res);
+                    }).catch((err)=>{
+                        reject(err);
+                    });
+
+                });
+            }else{
+                console.log('add cluster 1');
+                createCluster(newSensateId, sensate).then((res)=>{
+                    resolve(res);
+                }).catch((err)=>{
+                    console.log(err);
+                    reject(err);
+                });
+            }
+
+        }).catch((err)=>{
+            console.log(err);
+            reject(err);
+        });
+    });
+});
+
+/*export const clusterCreation = functions.firestore
   .document('sensies/{id}')
   .onCreate((snap, context) => {
 
@@ -46,23 +107,23 @@ export const clusterCreation = functions.firestore
         if(sensateDesiredClusters['monthAndDay']){
             let dob = moment(sensatesDoB);
             //Fix this query aggregation issue
-            /*clustersRef
-                .where('type','==','monthAndDay')
-                .where('typeData', '==',  extractMonthAndDayFromDate(dob));*/
+            //clustersRef
+            //    .where('type','==','monthAndDay')
+            //    .where('typeData', '==',  extractMonthAndDayFromDate(dob));
         }
         if(sensateDesiredClusters['monthAndYear']){
             let dob = moment(sensatesDoB);
             //Fix this query aggregation issue
-            /*clustersRef
-                .where('type','==','monthAndYear')
-                .where('typeData', '==',  extractMonthAndYearFromDate(dob));*/ 
+            //clustersRef
+            //    .where('type','==','monthAndYear')
+            //    .where('typeData', '==',  extractMonthAndYearFromDate(dob));
         }
         if(sensateDesiredClusters['month']){
             let dob = moment(sensatesDoB);
             //Fix this query aggregation issue
-            /*clustersRef
-                .where('type','==','month')
-                .where('typeData', '==', extractMonthFromDate(dob));*/   
+            //clustersRef
+              //  .where('type','==','month')
+              //  .where('typeData', '==', extractMonthFromDate(dob));
         }
         
         clustersRef.get().then((clustersFiltered) => {
@@ -105,6 +166,15 @@ export const clusterCreation = functions.firestore
     });
 
 });
+*/
+
+/*export const deletePostSubcollection = functions.firestore
+.document('clusters/{clusterId}/posts/{postId}/{collection}')
+.onDelete((snap, context) => {
+    console.log(snap, JSON.stringify(snap));
+    console.log(context, JSON.stringify(context));
+    return deleteCollection(db,context.resource.name,5);
+});*/
 
 function getSensatesData(sensates, newSensateId){
     let sensatesPromises = [];
@@ -146,7 +216,7 @@ function updateCluster(clusterId, clusterType, sensates, newSensateId){
     
     return new Promise((resolve, reject) =>{
 
-        sensates[newSensateId] = true;
+        sensates[newSensateId] = false;
 
         db.collection('clusters').doc(clusterId).update({sensates: sensates}).then((sensateAddedResponse:any)=>{
             console.log('Added to '+clusterType+' cluster', sensateAddedResponse);
