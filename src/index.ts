@@ -70,6 +70,81 @@ export const sensieCreation = functions.firestore
     });
 });
 
+export const sensieClusterApproval = functions.firestore
+.document('/clusters/{clusterId}/sensieapprovals/{approvalId}')
+.onCreate((snap, context) =>{
+    const clusterId = context.params.clusterId;
+
+    return new Promise((resolve, reject) =>{
+        const approvalData = snap.data();
+        const newSensieId = approvalData.newSensieUid;
+        const status = approvalData.status;
+        let sensatesObj = {};
+
+        return db.doc('clusters/'+clusterId).get().then((clusterInfo)=>{
+            let clusterData = clusterInfo.data();
+            let pendingApproval = [];
+            let approved = [];
+            sensatesObj = clusterData.sensates;
+            Object.keys(clusterData.sensates).forEach((sensie)=>{
+                if(!clusterData.sensates[sensie]){
+                    pendingApproval.push(sensie);
+                }else{
+                    approved.push(sensie);
+                }
+            });
+
+            if(status == 'deny'){
+                resolve({status: 'deny'});
+            }
+            if(status == 'approve'){
+                db.collection('clusters/'+clusterId+'/sensieapprovals')
+                .where('newSensieUid','==',newSensieId)
+                .get()
+                .then((sensieApprovalInfo)=>{
+                    let sensieApprovalDocs = [];
+                    sensieApprovalInfo.docs.forEach((sensieApprovalDoc)=>{
+                        sensieApprovalDocs.push(sensieApprovalDoc.data());
+                    });
+                    //If the number of approvals matches the approved sensies, verify if all have approved.
+                    if(approved.length === sensieApprovalDocs.length){
+                        let sensieApproved:boolean = false;
+                        sensieApprovalDocs.forEach((approval)=>{
+                            approved.forEach((approvedSensie)=>{
+                                if(approval.status == 'approve' && 
+                                    approval.uid == approvedSensie){
+                                    sensieApproved = true;
+                                }
+                            });
+                        });
+                        if(sensieApproved){
+                            console.log(sensieApproved);
+                            sensatesObj[newSensieId] = true;
+                            db.doc('clusters/'+clusterId).update({
+                                sensates: sensatesObj
+                            }).then((res)=>{
+                                resolve({status: sensieApproved});
+                            },(err)=>{
+                                resolve(err);
+                            }).catch((err)=>{
+                                resolve(err);
+                            });
+                        }
+                    }else{
+                        resolve({status: 'pending'});
+                    }
+                },(err)=>{
+                    reject(err);
+                }).catch((err)=>{
+                    reject(err);
+                });
+            }
+        }).catch((err)=>{
+            reject(err);
+        });
+    });
+});
+
 /*export const clusterCreation = functions.firestore
   .document('sensies/{id}')
   .onCreate((snap, context) => {
