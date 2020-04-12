@@ -81,67 +81,83 @@ export const sensieClusterApproval = functions.firestore
         const status = approvalData.status;
         let sensatesObj = {};
 
-        return db.doc('clusters/'+clusterId).get().then((clusterInfo)=>{
-            let clusterData = clusterInfo.data();
-            let pendingApproval = [];
-            let approved = [];
-            sensatesObj = clusterData.sensates;
-            Object.keys(clusterData.sensates).forEach((sensie)=>{
-                if(!clusterData.sensates[sensie]){
-                    pendingApproval.push(sensie);
-                }else{
-                    approved.push(sensie);
-                }
-            });
+        //console.log(approvalData);
 
-            if(status == 'deny'){
-                resolve({status: 'deny'});
-            }
-            if(status == 'approve'){
-                db.collection('clusters/'+clusterId+'/sensieapprovals')
-                .where('newSensieUid','==',newSensieId)
-                .get()
-                .then((sensieApprovalInfo)=>{
-                    let sensieApprovalDocs = [];
-                    sensieApprovalInfo.docs.forEach((sensieApprovalDoc)=>{
-                        sensieApprovalDocs.push(sensieApprovalDoc.data());
-                    });
-                    //If the number of approvals matches the approved sensies, verify if all have approved.
-                    if(approved.length === sensieApprovalDocs.length){
-                        let sensieApproved:boolean = false;
-                        sensieApprovalDocs.forEach((approval)=>{
-                            approved.forEach((approvedSensie)=>{
-                                if(approval.status == 'approve' && 
-                                    approval.uid == approvedSensie){
-                                    sensieApproved = true;
-                                }
-                            });
-                        });
-                        if(sensieApproved){
-                            console.log(sensieApproved);
-                            sensatesObj[newSensieId] = true;
-                            db.doc('clusters/'+clusterId).update({
-                                sensates: sensatesObj
-                            }).then((res)=>{
-                                resolve({status: sensieApproved});
-                            },(err)=>{
-                                resolve(err);
-                            }).catch((err)=>{
-                                resolve(err);
-                            });
-                        }
+        if(status == 'deny'){
+            //console.log('deny');
+            resolve({status: 'deny'});
+        }else{
+            db.doc('clusters/'+clusterId).get().then((clusterInfo)=>{
+                let clusterData = clusterInfo.data();
+                //console.log(clusterData);
+                let pendingApproval = [];
+                let approved = [];
+                sensatesObj = clusterData.sensates;
+                Object.keys(clusterData.sensates).forEach((sensie)=>{
+                    if(!clusterData.sensates[sensie]){
+                        pendingApproval.push(sensie);
                     }else{
-                        resolve({status: 'pending'});
+                        approved.push(sensie);
                     }
-                },(err)=>{
-                    reject(err);
-                }).catch((err)=>{
-                    reject(err);
                 });
-            }
-        }).catch((err)=>{
-            reject(err);
-        });
+    
+                if(status == 'approve'){
+                    db.collection('clusters/'+clusterId+'/sensieapprovals')
+                    .where('newSensieUid','==',newSensieId)
+                    .get()
+                    .then((sensieApprovalInfo)=>{
+                        let sensieApprovalDocs = [];
+                        sensieApprovalInfo.docs.forEach((sensieApprovalDoc)=>{
+                            sensieApprovalDocs.push(sensieApprovalDoc.data());
+                        });
+                        //console.log(JSON.stringify(sensieApprovalDocs));
+                        //console.log(JSON.stringify(approved));
+                        //console.log(sensieApprovalDocs.length, approved.length)
+                        //If the number of approvals matches the approved sensies, 
+                        //verify if all have approved.
+                        if(approved.length === sensieApprovalDocs.length){
+                            let sensieApproved:boolean = false;
+                            let numSensiesApproved:number = 0;
+                            sensieApprovalDocs.forEach((approval)=>{
+                                approved.forEach((approvedSensie)=>{
+                                    if(approval.status == 'approve' && 
+                                        approval.uid == approvedSensie){
+                                        numSensiesApproved++;
+                                    }
+                                });
+                            });
+                            if(numSensiesApproved==approved.length){
+                                sensieApproved = true;
+                            }
+                            if(sensieApproved){
+                                console.log(sensieApproved);
+                                sensatesObj[newSensieId] = true;
+                                //console.log(sensatesObj);
+                                db.doc('clusters/'+clusterId).update({
+                                    sensates: sensatesObj
+                                }).then((res)=>{
+                                    //console.log(res, 'updated');
+                                    resolve({status: sensieApproved});
+                                },(err)=>{
+                                    reject(err);
+                                }).catch((err)=>{
+                                    reject(err);
+                                });
+                            }
+                        }else{
+                            //console.log('pending')
+                            resolve({status: 'pending'});
+                        }
+                    },(err)=>{
+                        reject(err);
+                    }).catch((err)=>{
+                        reject(err);
+                    });
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        }
     });
 });
 
