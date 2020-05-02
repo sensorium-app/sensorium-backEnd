@@ -307,7 +307,7 @@ function updateCluster(clusterId, clusterType, sensates, newSensateId){
     
     return new Promise((resolve, reject) =>{
 
-        sensates[newSensateId] = false;
+        sensates[newSensateId] = true;
 
         db.collection('clusters').doc(clusterId).update({sensates: sensates}).then((sensateAddedResponse:any)=>{
             console.log('Added to '+clusterType+' cluster', sensateAddedResponse);
