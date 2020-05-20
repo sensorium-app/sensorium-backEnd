@@ -18,15 +18,16 @@ export const sensieCreation = functions.firestore
 
     return new Promise((resolve, reject) =>{
         const sensate = snap.data();
-        //console.log('sensateData',sensate);
+        console.log('sensateData',sensate);
+        console.log('sensateDatee',sensate.dateOfBirth);
 
         const sensateDesiredClusters = sensate.desiredClusters;
-        const sensatesDoB = sensate.dateTimeOfBirth;
+        const sensatesDoB = sensate.dateOfBirth;
         const aboutme = sensate.aboutme;
         //let clustersRef = db.collection('clusters');
         //console.log("new", sensateDesiredClusters, sensatesDoB,aboutme)
 
-        let dob = moment(sensatesDoB);
+        let dob = moment(sensatesDoB.seconds * 1000);
         console.log(dob,extractMonthAndDayFromDate(dob))
         db.collection('clusters')
             .where('type','==','monthAndDay')
@@ -367,15 +368,15 @@ function createCluster(newSensateId, sensateData){
                 }
                 if(desiredCluster === 'monthAndDay'){
                     console.log('add monthAndDay');
-                    clusterTypeData = extractMonthAndDayFromDate(sensateData.dateTimeOfBirth);
+                    clusterTypeData = extractMonthAndDayFromDate(sensateData.dateOfBirth.seconds * 1000);
                 }
                 if(desiredCluster === 'monthAndYear'){
                     console.log('add monthAndYear');
-                    clusterTypeData = extractMonthAndYearFromDate(sensateData.dateTimeOfBirth);
+                    clusterTypeData = extractMonthAndYearFromDate(sensateData.dateOfBirth);
                 }
                 if(desiredCluster === 'month'){
                     console.log('add month');
-                    clusterTypeData = extractMonthFromDate(sensateData.dateTimeOfBirth);
+                    clusterTypeData = extractMonthFromDate(sensateData.dateOfBirth);
                 }
 
                 const newClusterType = {
