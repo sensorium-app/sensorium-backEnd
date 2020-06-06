@@ -23,10 +23,10 @@ export function sendEmail (emailsAndNames:any[]){
         message['To'] = [
             {
                 Email: sensateData.email,
-                Name: sensateData.name
+                Name: ''
             }
         ];
-        message.Variables.name = sensateData.name;
+        message.Variables.name = '';
         
         requestBody['Messages'].push(message);
     });

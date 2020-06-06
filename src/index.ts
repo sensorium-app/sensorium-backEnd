@@ -273,7 +273,14 @@ function getSensatesData(sensates, newSensateId){
     Object.keys(sensates).forEach((sensateKey)=>{
         if(sensateKey !== newSensateId){
             sensatesPromises.push(
-                db.collection('sensies').doc(sensateKey).get().then((sensateData)=>{
+
+                auth.getUser(sensateKey).then((res)=>{
+                    return res;
+                }).catch((err)=>{
+                    console.log(err);
+                    return null;
+                })
+                /*db.collection('sensies').doc(sensateKey).get().then((sensateData)=>{
                     if(sensateData.exists){
                         return sensateData.data();
                     }else{
@@ -281,7 +288,7 @@ function getSensatesData(sensates, newSensateId){
                     }
                 }).catch((err)=>{
                     return null;
-                })
+                })*/
             )
         }
     });
@@ -294,12 +301,10 @@ function getSensatesData(sensates, newSensateId){
             if(sensatesData){
                 list.push( {
                     email: sensatesData.email,
-                    name: sensatesData.name
                 });
             }
         });
-
-        return list;
+        return list;    
     });
 
 }
@@ -317,6 +322,7 @@ function updateCluster(clusterId, clusterType, sensates, newSensateId){
                 console.log('setClaimToUser');
 
                 getSensatesData(sensates, newSensateId).then((sensateList)=>{
+                    console.log(sensateList);
                     sendEmail(sensateList).then((emailResponse)=>{
                         console.log('emailResponse',emailResponse);
                         resolve(emailResponse);
