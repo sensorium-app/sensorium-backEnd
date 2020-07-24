@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as mailjet  from 'node-mailjet';
+import * as admin from 'firebase-admin';
 
 export function sendEmail (emailsAndNames:any[]){
 
@@ -9,7 +10,7 @@ export function sendEmail (emailsAndNames:any[]){
     emailsAndNames.forEach((sensateData)=>{
         let message = {
             "From": {
-                "Email": "info@sensorium.online",
+                "Email": "help@sensoriumapp.net",
                 "Name": "Sensorium"
             },
             "TemplateID": 467059,
@@ -57,3 +58,29 @@ export function sendEmail (emailsAndNames:any[]){
             });
     });
 }
+
+/*export function sendPushNotification (fcmTokens, data:any){
+    return new Promise((resolve,reject)=>{
+
+        var message = {
+        data: data,
+        tokens: fcmTokens
+        };
+
+        // Send a message to the device corresponding to the provided
+        // registration token.
+        admin.messaging().sendMulticast(message)
+        .then((response) => {
+            if (response.failureCount > 0) {
+                const failedTokens = [];
+                response.responses.forEach((resp, idx) => {
+                    if (!resp.success) {
+                    failedTokens.push(fcmTokens[idx]);
+                    }
+                });
+                console.log('List of tokens that caused failures: ' + failedTokens);
+            }
+            resolve();
+        });
+    })
+}*/
